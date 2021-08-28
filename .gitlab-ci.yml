@@ -1,0 +1,29 @@
+stages:
+  - build
+
+docker-build:
+  image: carlonluca/docker-multiarch:latest
+  stage: build
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_DOCKER_HUB_USER" -p "$CI_DOCKER_HUB_PASSWORD" docker.io
+  script:
+    - export DOCKER_CLI_EXPERIMENTAL=enabled
+    - export VERSION=$(cat VERSION)
+    - docker run --privileged --rm tonistiigi/binfmt --install all
+    - docker buildx create --name mybuilder_polr --use --platform linux/arm64/v8,linux/386,linux/arm/v7,linux/arm/v6,linux/amd64
+    - docker buildx use mybuilder_polr
+    - docker buildx build --push --platform linux/arm/v6 -t carlonluca/polr:dev-armv6 .
+    - docker buildx build --push --platform linux/arm/v7 -t carlonluca/polr:dev-armv7 .
+    - docker buildx build --push --platform linux/arm64/v8 -t carlonluca/polr:dev-armv8 .
+    - docker buildx build --push --platform linux/amd64 -t carlonluca/polr:dev-amd64 .
+    - docker buildx build --push --platform linux/386 -t carlonluca/polr:dev-386 .
+    - docker manifest create carlonluca/polr:$VERSION --amend carlonluca/polr:dev-armv7 --amend carlonluca/polr:dev-armv8 --amend carlonluca/polr:dev-amd64 --amend carlonluca/polr:dev-386
+    - docker manifest create carlonluca/polr:latest --amend carlonluca/polr:dev-armv7 --amend carlonluca/polr:dev-armv8 --amend carlonluca/polr:dev-amd64 --amend carlonluca/polr:dev-386
+    - docker manifest push carlonluca/polr:$VERSION
+    - docker manifest push carlonluca/polr:latest
+    - docker buildx stop mybuilder_polr
+    - docker buildx rm mybuilder_polr
+  rules:
+    - when: manual
