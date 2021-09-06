@@ -18,9 +18,9 @@ docker-build:
     - docker buildx build --push --platform linux/arm/v7 -t carlonluca/polr:dev-armv7 .
     - docker buildx build --push --platform linux/arm64/v8 -t carlonluca/polr:dev-armv8 .
     - docker buildx build --push --platform linux/amd64 -t carlonluca/polr:dev-amd64 .
-    #- docker buildx build --push --platform linux/386 -t carlonluca/polr:dev-386 .
-    - docker manifest create carlonluca/polr:$VERSION --amend carlonluca/polr:dev-armv7 --amend carlonluca/polr:dev-armv8 --amend carlonluca/polr:dev-amd64
-    - docker manifest create carlonluca/polr:latest --amend carlonluca/polr:dev-armv7 --amend carlonluca/polr:dev-armv8 --amend carlonluca/polr:dev-amd64
+    - docker buildx build --push --platform linux/386 -t carlonluca/polr:dev-386 .
+    - docker manifest create carlonluca/polr:$VERSION --amend carlonluca/polr:dev-armv7 --amend carlonluca/polr:dev-armv8 --amend carlonluca/polr:dev-amd64 --amend carlonluca/polr:dev-386
+    - docker manifest create carlonluca/polr:latest --amend carlonluca/polr:dev-armv7 --amend carlonluca/polr:dev-armv8 --amend carlonluca/polr:dev-amd64 --amend carlonluca/polr:dev-386
     - docker manifest push carlonluca/polr:$VERSION
     - docker manifest push carlonluca/polr:latest
     - docker buildx stop mybuilder_polr
